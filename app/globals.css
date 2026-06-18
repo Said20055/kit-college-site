@@ -1,0 +1,241 @@
+@import "tailwindcss";
+
+/* ============================================================
+   ДИЗАЙН-ТОКЕНЫ
+   Стиль: «Accessible & Ethical» (WCAG AAA) — гос. учреждение СПО.
+   Палитра: высококонтрастный navy + blue.
+   ============================================================ */
+:root {
+  --c-primary: #17305a;
+  --c-primary-600: #284a7d;
+  --c-on-primary: #ffffff;
+  --c-secondary: #334155;
+  --c-accent: #0369a1;
+  --c-accent-700: #075985;
+  --c-accent-soft: #e0f2fe;
+  --c-background: #f8fafc;
+  --c-surface: #ffffff;
+  --c-foreground: #020617;
+  --c-muted: #e8ecf1;
+  --c-muted-fg: #475569;
+  --c-border: #e2e8f0;
+  --c-success: #15803d;
+  --c-destructive: #dc2626;
+  --c-ring: #0369a1;
+
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.06);
+  --shadow-md: 0 6px 20px -6px rgba(2, 6, 23, 0.12);
+  --shadow-lg: 0 24px 60px -20px rgba(2, 6, 23, 0.25);
+
+  --a11y-font-scale: 1;
+  --a11y-letter-spacing: normal;
+}
+
+@theme inline {
+  --color-primary: var(--c-primary);
+  --color-primary-600: var(--c-primary-600);
+  --color-on-primary: var(--c-on-primary);
+  --color-secondary: var(--c-secondary);
+  --color-accent: var(--c-accent);
+  --color-accent-700: var(--c-accent-700);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-background: var(--c-background);
+  --color-surface: var(--c-surface);
+  --color-foreground: var(--c-foreground);
+  --color-muted: var(--c-muted);
+  --color-muted-fg: var(--c-muted-fg);
+  --color-border: var(--c-border);
+  --color-success: var(--c-success);
+  --color-destructive: var(--c-destructive);
+  --color-ring: var(--c-ring);
+
+  --font-sans: var(--font-pt-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-pt-serif), ui-serif, Georgia, serif;
+
+  --shadow-card: var(--shadow-md);
+}
+
+/* ---------- Базовые стили ---------- */
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  font-size: calc(100% * var(--a11y-font-scale));
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  letter-spacing: var(--a11y-letter-spacing);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+/* ---------- Доступность: фокус по клавиатуре ---------- */
+:focus-visible {
+  outline: 3px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Ссылка «к основному содержимому» */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: 1000;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-radius: 0 0 8px 8px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================================
+   ВЕРСИЯ ДЛЯ СЛАБОВИДЯЩИХ (ГОСТ Р 52872-2019)
+   Активируется data-атрибутами на <html>.
+   ============================================================ */
+html[data-a11y="on"] {
+  --c-background: var(--a11y-bg);
+  --c-surface: var(--a11y-bg);
+  --c-foreground: var(--a11y-fg);
+  --c-muted-fg: var(--a11y-fg);
+  --c-primary: var(--a11y-fg);
+  --c-primary-600: var(--a11y-fg);
+  --c-on-primary: var(--a11y-bg);
+  --c-secondary: var(--a11y-fg);
+  --c-accent: var(--a11y-fg);
+  --c-accent-700: var(--a11y-fg);
+  --c-accent-soft: var(--a11y-bg);
+  --c-muted: var(--a11y-bg);
+  --c-border: var(--a11y-fg);
+  --c-ring: var(--a11y-fg);
+}
+
+/* Цветовые схемы */
+html[data-a11y-theme="white"] { --a11y-bg: #ffffff; --a11y-fg: #000000; }
+html[data-a11y-theme="black"] { --a11y-bg: #000000; --a11y-fg: #ffffff; }
+html[data-a11y-theme="beige"] { --a11y-bg: #f7f3d6; --a11y-fg: #4d4b43; }
+html[data-a11y-theme="blue"]  { --a11y-bg: #9dd1ff; --a11y-fg: #063462; }
+html[data-a11y-theme="green"] { --a11y-bg: #3b2716; --a11y-fg: #a9e44d; }
+
+/* В режиме слабовидящих — убрать декоративные эффекты */
+html[data-a11y="on"] body {
+  background: var(--color-background) !important;
+}
+html[data-a11y="on"] *,
+html[data-a11y="on"] *::before,
+html[data-a11y="on"] *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background-image: none !important;
+  border-radius: 0 !important;
+  transition: none !important;
+  animation: none !important;
+}
+html[data-a11y="on"] .decorative,
+html[data-a11y="on"] [data-decorative] {
+  display: none !important;
+}
+html[data-a11y="on"] a {
+  text-decoration: underline;
+}
+/* При увеличенном шрифте длинные слова переносим со знаком переноса */
+html[data-a11y="on"] h1,
+html[data-a11y="on"] h2,
+html[data-a11y="on"] h3,
+html[data-a11y="on"] h4 {
+  hyphens: auto;
+}
+html[data-a11y="on"][data-a11y-images="off"] img,
+html[data-a11y="on"][data-a11y-images="off"] svg[data-illustration] {
+  display: none !important;
+}
+
+/* ---------- Утилиты вёрстки ---------- */
+.container-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  .container-page { padding-inline: 2rem; }
+}
+
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease;
+}
+.link-underline:hover { background-size: 100% 2px; }
+
+/* ============================================================
+   ДЕКОРАТИВНЫЕ АНИМАЦИИ (на transform/opacity — лёгкие)
+   ============================================================ */
+@keyframes aurora {
+  0%   { transform: translate3d(-8%, -6%, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate3d(8%, 6%, 0) rotate(8deg) scale(1.15); }
+  100% { transform: translate3d(-8%, -6%, 0) rotate(0deg) scale(1); }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9); opacity: 0.7; }
+  70%  { transform: scale(1.6); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.anim-aurora { animation: aurora 22s ease-in-out infinite; will-change: transform; }
+.anim-float  { animation: float-y 7s ease-in-out infinite; will-change: transform; }
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-muted);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+/* ---------- Уважение к prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .anim-aurora,
+  .anim-float { animation: none !important; }
+}

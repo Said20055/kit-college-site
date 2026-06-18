@@ -1,0 +1,312 @@
+// Схема данных сайта ГБПОУ РД «КИТ».
+// Фаза 0: контентные таблицы (источник — lib/college.ts и lib/sveden.ts).
+// Таблицы аутентификации (User/Session/AuditLog) добавляются в Фазе 1,
+// медиатека (MediaFile) — в Фазе 3. До этого ссылки на файлы хранятся строкой (href).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum NewsStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum DocCategory {
+  GENERAL // Подраздел «Документы»
+  LICENSE // Лицензия и аккредитация
+  PAID_EDU // Платные образовательные услуги
+}
+
+/// Профиль организации и реквизиты (singleton — одна строка).
+model CollegeProfile {
+  id          String @id @default("singleton")
+  shortName   String
+  abbr        String
+  fullName    String
+  tagline     String
+  description String
+  founded     String
+  inn         String
+  kpp         String
+  ogrn        String
+  founder     String
+  founderUrl  String
+
+  // Руководитель (college.director)
+  directorName          String
+  directorPost          String
+  directorReceptionTime String
+  directorPhone         String
+  directorEmail         String
+
+  // Контакты (college.contacts)
+  address      String
+  addressShort String
+  phone        String
+  phoneHref    String
+  email        String
+  workTime     String
+  mapCoords    String
+
+  updatedAt DateTime @updatedAt
+}
+
+/// Пункт главного меню (mainNav).
+model NavItem {
+  id    String @id @default(cuid())
+  label String
+  href  String
+  order Int
+}
+
+/// Новость. Тело — очищенный HTML (Фаза 2 — WYSIWYG); сейчас засидено из массива абзацев.
+model NewsItem {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  excerpt     String
+  bodyHtml    String
+  tag         String
+  status      NewsStatus @default(PUBLISHED)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  coverId     String?
+  cover       MediaFile? @relation(fields: [coverId], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
+}
+
+/// Числовой показатель на главной (stats).
+model StatItem {
+  id     String @id @default(cuid())
+  value  Int
+  suffix String
+  label  String
+  order  Int
+}
+
+/// Преимущество на главной (advantages).
+model Advantage {
+  id    String @id @default(cuid())
+  icon  String
+  title String
+  text  String
+  order Int
+}
+
+/// Специальность/программа. Объединяет specialties (маркетинг) и eduPrograms (Сведения).
+/// vacantPlaces и fgosLinks выводятся из полей этой модели.
+model Program {
+  id            String  @id @default(cuid())
+  code          String  @unique
+  name          String
+  qualification String
+  group         String
+  level         String
+  forms         String
+  duration      String
+  budgetPlaces  Int
+  paidPlaces    Int
+  foreignPlaces Int
+  accredited    Boolean
+  budgetVacant  Int
+  paidVacant    Int
+  fgosHref      String
+  isMarketing   Boolean @default(true)
+  order         Int
+}
+
+/// Подраздел спецраздела «Сведения» (svedenSections). intro — редактируемая проза (Фаза 4).
+model SvedenSection {
+  slug      String  @id
+  title     String
+  short     String
+  order     Int
+  isEnabled Boolean @default(true)
+  intro     String?
+}
+
+/// Документ со ссылкой на скачивание. Объединяет documents / licenseDocs / paidEduDocs.
+model Document {
+  id       String      @id @default(cuid())
+  title    String
+  note     String?
+  href     String      @default("")
+  category DocCategory
+  order    Int
+  fileId   String?
+  file     MediaFile?  @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([category, order])
+}
+
+/// Структурное подразделение (structUnits).
+model StructUnit {
+  id           String @id @default(cuid())
+  name         String
+  head         String
+  post         String
+  address      String
+  site         String
+  email        String
+  positionHref String
+  order        Int
+}
+
+/// Коллегиальный орган управления (governanceBodies).
+model GovernanceBody {
+  id    String @id @default(cuid())
+  name  String
+  order Int
+}
+
+/// Руководство — руководитель и заместители (leadership).
+model Manager {
+  id    String @id @default(cuid())
+  name  String
+  post  String
+  phone String
+  email String
+  order Int
+}
+
+/// Педагогический работник (teachers).
+model Teacher {
+  id             String @id @default(cuid())
+  fio            String
+  post           String
+  disciplines    String
+  eduLevel       String
+  qualification  String
+  degree         String
+  academicStatus String
+  retraining     String
+  qualImprovement String
+  generalExp     String
+  specialExp     String
+  programs       String
+  order          Int
+}
+
+/// Пункт материально-технического обеспечения (mtbItems).
+model MtbItem {
+  id    String @id @default(cuid())
+  title String
+  value String
+  order Int
+}
+
+/// Условие доступной среды (ovzConditions).
+model OvzCondition {
+  id    String @id @default(cuid())
+  text  String
+  order Int
+}
+
+/// Вид стипендии / меры поддержки (stipends).
+model Stipend {
+  id    String @id @default(cuid())
+  text  String
+  order Int
+}
+
+/// Финансово-хозяйственная деятельность (finances, singleton).
+model Finances {
+  id           String @id @default("singleton")
+  year         String
+  budgetVolume String
+  income       String
+  spending     String
+  planHref     String
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+/// Учётная запись администратора/редактора CMS.
+model User {
+  id               String     @id @default(cuid())
+  email            String     @unique
+  passwordHash     String
+  fullName         String
+  role             UserRole   @default(EDITOR)
+  isActive         Boolean    @default(true)
+  totpSecret       String? // зарезервировано под 2FA
+  totpEnabled      Boolean    @default(false)
+  failedLoginCount Int        @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  sessions         Session[]
+  auditLogs        AuditLog[]
+  mediaFiles       MediaFile[]
+}
+
+/// Серверная сессия (cookie хранит случайный токен, в БД — его SHA-256).
+model Session {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip        String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([userId])
+}
+
+/// Журнал действий (вход, управление контентом и пользователями).
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String?
+  entityId   String?
+  summary    String?
+  ip         String?
+  userAgent  String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+}
+
+enum MediaKind {
+  IMAGE
+  DOC
+}
+
+/// Файл медиатеки. Хранится на диске (storageKey), отдаётся через /media/[id].
+model MediaFile {
+  id           String     @id @default(cuid())
+  kind         MediaKind
+  title        String?
+  alt          String?
+  originalName String
+  storageKey   String     @unique
+  mimeType     String
+  sizeBytes    Int
+  width        Int?
+  height       Int?
+  checksum     String
+  uploadedById String?
+  uploadedBy   User?      @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  newsCovers   NewsItem[]
+  documents    Document[]
+
+  @@index([kind, createdAt])
+}

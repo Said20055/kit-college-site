@@ -1,0 +1,23 @@
+# Локальная разработка: PostgreSQL для сайта КИТ.
+# Запуск:  docker compose up -d db
+# Продакшен-стек (web + nginx) — см. docker-compose.prod.yml и docs/DEPLOY.md.
+services:
+  db:
+    image: postgres:16
+    container_name: kit-postgres
+    environment:
+      POSTGRES_USER: kit
+      POSTGRES_PASSWORD: kitpass
+      POSTGRES_DB: kit
+    ports:
+      - "5432:5432"
+    volumes:
+      - kit-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kit -d kit"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  kit-db-data:
